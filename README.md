@@ -14,3 +14,7 @@ extra: \
   "tenant_id": "TENANT_ID"
 }
 ```
+
+## Releasing
+
+See [RELEASING.md](RELEASING.md) for how to publish a new version to PyPI.
