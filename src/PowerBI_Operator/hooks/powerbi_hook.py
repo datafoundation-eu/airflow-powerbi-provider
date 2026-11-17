@@ -8,8 +8,8 @@ from airflow.sdk.bases.hook import BaseHook
 from azure.core.exceptions import ServiceRequestError, ServiceResponseError
 from azure.identity import ClientSecretCredential
 from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
 
+from PowerBI_Operator.hooks.powerbi_retry import PowerBIRetry
 from PowerBI_Operator.models.powerbi_models import PowerBIDatasetRefreshException, PowerBiDatasetRefreshDetails
 
 # HTTP status codes of throttling and server errors that are worth retrying.
@@ -73,9 +73,10 @@ class PowerBIHook(BaseHook):
         self._base_url = "https://api.powerbi.com"
         # (connect, read) timeout in seconds, so a hanging connection cannot block a task forever.
         self._timeout = (10, 60)
-        # Retries connection errors and throttling/server errors. POST is not in the default
-        # allowed_methods, so a refresh is never triggered twice after the request was sent.
-        self._retry = Retry(
+        # Retries connection errors (including TLS handshake timeouts) and throttling/server
+        # errors. POST is not in the default allowed_methods, so a refresh is never triggered
+        # twice after the request was sent.
+        self._retry = PowerBIRetry(
             total=5,
             backoff_factor=2,
             status_forcelist=RETRY_STATUS_CODES,
